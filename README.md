@@ -1,8 +1,46 @@
-# React + Vite
+# Outdoor Retail Tracker - Modern Dashboard
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Descripción
 
-Currently, two official plugins are available:
+Outdoor Retail Tracker es una aplicación diseñada para monitorear y analizar a los competidores en internet. La moderna interfaz de dashboard proporciona visualizaciones interactivas que facilitan la toma de decisiones informadas.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Características
+
+- **Panel Interactivo:** Visualización en tiempo real de las métricas clave de ventas.
+- **Análisis de Datos:** Herramientas avanzadas para el análisis de tendencias y patrones.
+- **Integración de Datos:** Conexión con múltiples fuentes de datos para una visión completa.
+- **Personalización:** Opciones para personalizar vistas y reportes según las necesidades del usuario.
+
+## Instalación
+
+1. Clona el repositorio:
+    ```bash
+    git clone https://github.com/cris-data-science/outdoor-retail-tracker.git
+    ```
+2. Navega al directorio del proyecto:
+    ```bash
+    cd outdoor-retail-tracker
+    ```
+3. Instala las dependencias:
+    ```bash
+    npm install
+    ```
+4. Inicia la aplicación:
+    ```bash
+    npm start
+    ```
+
+## Uso
+
+Después de iniciar la aplicación, accede al dashboard a través de tu navegador en `http://localhost:5173`. Desde allí, podrás explorar las diferentes visualizaciones y ajustar los filtros según tus necesidades.
+
+## Tecnologías
+
+- **Frontend:** React, Redux, D3.js
+- **Backend:** Node.js, Express
+- **Base de Datos:** MongoDB
+
+
+## Licencia
+
+Este proyecto está licenciado bajo la licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más detalles.
