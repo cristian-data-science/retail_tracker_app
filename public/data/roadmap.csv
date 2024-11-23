@@ -1,0 +1,63 @@
+Fase,Categoría,Tarea,Estado
+1,Autenticación y Seguridad,"Login de usuario básico",True
+1,Autenticación y Seguridad,"Recuperación de contraseñas",false
+1,Autenticación y Seguridad,"Gestión básica de perfiles de usuario",false
+1,Selección de Competidores,"Lista predefinida de competidores disponibles para análisis",false
+1,Selección de Competidores,"Interfaz sencilla para seleccionar un competidor específico",false
+1,Web Scraping Inicial,"Extracción básica de datos del catálogo de productos (nombre, precio, código de producto)",false
+1,Web Scraping Inicial,"Almacenamiento de datos en una base de datos local",false
+1,Web Scraping Inicial,"Manejo de errores básicos y validación de datos",false
+1,Visualización Simple de Datos,"Tablas que muestren los productos y sus atributos",false
+1,Visualización Simple de Datos,"Filtros básicos por categoría o rango de precios",false
+2,Gestión Avanzada de Competidores,"Opción para agregar nuevos competidores a monitorear",false
+2,Gestión Avanzada de Competidores,"Clasificación y etiquetado de competidores por segmento o mercado",false
+2,Web Scraping Avanzado,"Extracción de atributos adicionales: color, talla, materiales, características",false
+2,Web Scraping Avanzado,"Manejo de paginación y contenido dinámico",false
+2,Web Scraping Avanzado,"Programación de scraping automático en intervalos definidos",false
+2,Jerarquía y Categorización,"Mapeo y visualización de la estructura de categorías y subcategorías",false
+2,Jerarquía y Categorización,"Navegación por jerarquía de productos",false
+2,Dashboard Mejorado,"Gráficos básicos de tendencias de precios y disponibilidad",false
+2,Dashboard Mejorado,"Comparativas simples entre productos o categorías",false
+2,Dashboard Mejorado,"Sección de alertas sobre cambios significativos",false
+2,Exportación de Datos,"Opción para exportar datos a formatos como Excel o CSV",false
+2,Exportación de Datos,"Generación de reportes básicos",false
+3,Análisis de Productos,"Seguimiento de cambios en el catálogo (nuevos lanzamientos, productos descontinuados)",false
+3,Análisis de Productos,"Identificación de productos más vendidos o promocionados",false
+3,Alertas y Notificaciones Personalizadas,"Configuración de alertas según criterios específicos (cambios de precio, stock)",false
+3,Alertas y Notificaciones Personalizadas,"Notificaciones por correo electrónico o dentro de la aplicación",false
+3,Dashboard Personalizable,"Widgets configurables según las preferencias del usuario",false
+3,Dashboard Personalizable,"Interactividad en gráficos (hover, zoom, detalles al hacer clic)",false
+3,Reportes Avanzados,"Generación de informes personalizados",false
+3,Reportes Avanzados,"Programación de reportes periódicos",false
+3,Información Corporativa,"Sección dedicada a la historia y datos relevantes de la empresa competidora",false
+3,Información Corporativa,"Integración de noticias y actualizaciones recientes",false
+4,Análisis de Tendencias con IA,"Implementación de algoritmos para predecir tendencias de precios y demanda",false
+4,Análisis de Tendencias con IA,"Identificación de patrones y comportamientos del mercado",false
+4,Análisis de Sentimiento,"Integración con reseñas y valoraciones de productos",false
+4,Análisis de Sentimiento,"Análisis de la percepción del cliente mediante procesamiento de lenguaje natural",false
+4,Benchmarking Competitivo,"Comparación directa con los productos y precios de tu propia empresa",false
+4,Benchmarking Competitivo,"Análisis de estrategias de pricing y promociones",false
+4,Integración con Redes Sociales,"Monitoreo de la actividad del competidor en plataformas como Facebook, Instagram, Twitter",false
+4,Integración con Redes Sociales,"Análisis de campañas publicitarias y engagement",false
+4,Integraciones con Herramientas de BI,"Conexión con plataformas como Power BI o Tableau",false
+4,Integraciones con Herramientas de BI,"APIs para acceso y manipulación de datos externos",false
+4,Mejoras Futuras para el Dashboard,"Mapas de Calor Interactivos: Para identificar rápidamente categorías o productos con mayor actividad",false
+4,Mejoras Futuras para el Dashboard,"Gráficos de Dispersión y Correlación: Análisis de relaciones entre variables como precio y volumen de ventas",false
+4,Mejoras Futuras para el Dashboard,"Análisis Geoespacial: Mapas que muestren la distribución geográfica de tiendas físicas o zonas de envío",false
+4,Mejoras Futuras para el Dashboard,"Integración con datos demográficos y de mercado",false
+4,Mejoras Futuras para el Dashboard,"Realidad Aumentada (AR): Visualización de productos en 3D",false
+4,Mejoras Futuras para el Dashboard,"Experiencias interactivas para una mejor comprensión de los datos",false
+4,Mejoras Futuras para el Dashboard,"Paneles Colaborativos: Compartir dashboards y reportes con miembros del equipo",false
+4,Mejoras Futuras para el Dashboard,"Funcionalidades de comentarios y anotaciones en tiempo real",false
+4,Mejoras Futuras para el Dashboard,"Personalización Avanzada: Temas y esquemas de color personalizados",false
+4,Mejoras Futuras para el Dashboard,"Configuración de KPIs y métricas clave específicas para el usuario",false
+4,Mejoras Futuras para el Dashboard,"Aplicación Móvil o Versión Responsive: Acceso al dashboard desde dispositivos móviles",false
+4,Mejoras Futuras para el Dashboard,"Notificaciones push para alertas importantes",false
+4,Mejoras Futuras para el Dashboard,"Integración con Asistentes Virtuales: Uso de chatbots o asistentes de voz para consultas rápidas",false
+4,Mejoras Futuras para el Dashboard,"Automatización de tareas dentro de la aplicación",false
+4,Mejoras Futuras para el Dashboard,"Análisis en Tiempo Real: Actualización en tiempo real de datos y visualizaciones",false
+4,Mejoras Futuras para el Dashboard,"Monitoreo continuo de cambios en el mercado",false
+4,Mejoras Futuras para el Dashboard,"Herramientas de Colaboración y Gestión de Proyectos: Integración con herramientas como Slack, Trello o Asana",false
+4,Mejoras Futuras para el Dashboard,"Seguimiento de tareas y asignación de responsabilidades dentro del equipo",false
+4,Mejoras Futuras para el Dashboard,"Seguridad y Cumplimiento Avanzado: Implementación de estándares de seguridad más estrictos",false
+4,Mejoras Futuras para el Dashboard,"Cumplimiento con regulaciones como GDPR o CCPA",false
