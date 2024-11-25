@@ -20,7 +20,19 @@ const ScanModal = ({
   handleRescanTechnology,
   rescanTechError,
   cmsLogos,
+  onCancelScan,  // Agregar esta prop
 }) => {
+  const handleCancel = async () => {
+    if (isRescanningLogo || isRescanningTech) {
+      try {
+        await onCancelScan();  // Esperar a que se complete la cancelación
+      } catch (error) {
+        console.error('Error al cancelar el escaneo:', error);
+      }
+    }
+    setShowScanModal(false);
+  };
+
   return (
     <AnimatePresence>
       {showScanModal && (
@@ -82,7 +94,7 @@ const ScanModal = ({
                               <input
                                 type="radio"
                                 name={`display-${selectedCompetitor?.id}`}
-                                checked={selectedCompetitor?.showLogo === true}
+                                checked={selectedCompetitor?.showLogo === true || selectedCompetitor?.showLogo === 'true'}
                                 onChange={() => handleDisplayPreferenceChange(selectedCompetitor, true)}
                                 className="mr-2"
                               />
@@ -92,7 +104,7 @@ const ScanModal = ({
                               <input
                                 type="radio"
                                 name={`display-${selectedCompetitor?.id}`}
-                                checked={selectedCompetitor?.showLogo === false}
+                                checked={selectedCompetitor?.showLogo === false || selectedCompetitor?.showLogo === 'false'}
                                 onChange={() => handleDisplayPreferenceChange(selectedCompetitor, false)}
                                 className="mr-2"
                               />
@@ -213,10 +225,10 @@ const ScanModal = ({
             </div>
 
             <button
-              onClick={() => setShowScanModal(false)}
+              onClick={handleCancel}
               className="w-full mt-6 px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors"
             >
-              Cerrar
+              {(isRescanningTech || isRescanningLogo) ? 'Cancelar Escaneo' : 'Cerrar'}
             </button>
           </motion.div>
         </motion.div>
