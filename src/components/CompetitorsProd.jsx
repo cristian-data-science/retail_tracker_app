@@ -73,24 +73,22 @@ const CompetitorsProd = () => {
 
   const loadCompetitors = async () => {
     try {
-      const response = await fetch('http://localhost:8000/competitors/details');
+      const response = await fetch('http://localhost:8000/api/competitors/details');
       if (!response.ok) throw new Error('Error cargando competidores');
       
       const data = await response.json();
       const formattedCompetitors = data.competitors.map(comp => ({
-        id: comp.name, // Usando name como id único
+        id: comp.name,
         name: comp.name,
-        url: comp.url, // Agregamos la URL
-        logo: comp.link_logo || '', // Asegurarnos de que siempre haya un valor
+        url: comp.url,
+        link_logo: comp.link_logo || '', // Cambiar logo por link_logo
         technology: comp.technology || 'Unknown',
         technologyLogo: comp.technology_logo || '',
         products: 0,
         lastScraped: "Pendiente",
         status: "active",
-        // Mostrar logo por defecto solo si existe un logo válido
-        showLogo: comp.show_logo !== undefined ? 
-          comp.show_logo === 'true' : 
-          (comp.link_logo && comp.link_logo !== '' && comp.link_logo !== 'undefined')
+        // Asegurarse de que show_logo sea string y esté en minúsculas
+        show_logo: String(comp.show_logo).toLowerCase()
       }));
       
       setCompetitors(formattedCompetitors);
@@ -110,7 +108,7 @@ const CompetitorsProd = () => {
 
   const handleConfirmDelete = async () => {
     try {
-      const response = await fetch(`http://localhost:8000/competitor/delete/${competitorToDelete.name}`, {
+      const response = await fetch(`http://localhost:8000/api/competitor/delete/${competitorToDelete.name}`, {
         method: 'DELETE',
       });
 
@@ -137,7 +135,7 @@ const CompetitorsProd = () => {
 
     try {
         // Verificar competidor existente
-        const existingCompetitors = await fetch('http://localhost:8000/competitors/details');
+        const existingCompetitors = await fetch('http://localhost:8000/api/competitors/details');
         const data = await existingCompetitors.json();
         
         const competitorExists = data.competitors.some(
@@ -170,7 +168,7 @@ const CompetitorsProd = () => {
 
         // Crear competidor usando el logoUrl obtenido
         const createResponse = await fetch(
-            `http://localhost:8000/competitor/create/${formData.name}?url=${encodeURIComponent(formData.url)}&logo=${encodeURIComponent(logoUrl)}`,
+            `http://localhost:8000/api/competitor/create/${formData.name}?url=${encodeURIComponent(formData.url)}&logo=${encodeURIComponent(logoUrl)}`,
             { method: 'POST' }
         );
 
@@ -204,7 +202,12 @@ const CompetitorsProd = () => {
   );
 
   const handleScanClick = (competitor) => {
-    setSelectedCompetitor(competitor);
+    // Asegurarse de que show_logo sea un string 'true' o 'false'
+    const normalizedCompetitor = {
+      ...competitor,
+      show_logo: String(competitor.show_logo).toLowerCase()
+    };
+    setSelectedCompetitor(normalizedCompetitor);
     setShowScanModal(true);
   };
 
@@ -316,39 +319,27 @@ const CompetitorsProd = () => {
   // Actualizar preferencia de visualización
   const handleDisplayPreferenceChange = async (competitor, showLogo) => {
     try {
-      // Actualizar inmediatamente el estado local solo para este competidor
-      const updatedCompetitors = competitors.map(comp => {
-        if (comp.id === competitor.id) {
-          return { ...comp, showLogo };
-        }
-        return comp;
-      });
-      setCompetitors(updatedCompetitors);
-      
-      // Actualizar también el selectedCompetitor para que los radio buttons se actualicen
-      setSelectedCompetitor(prev => ({
-        ...prev,
-        showLogo
-      }));
-
-      const response = await fetch(`http://localhost:8000/competitor/update-display/${competitor.name}`, {
+      const response = await fetch(`http://localhost:8000/api/competitor/update-display/${competitor.name}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ show_logo: showLogo })
       });
-
+  
       if (!response.ok) {
-        // Si hay error, revertir los cambios
-        setCompetitors(competitors);
-        setSelectedCompetitor(prev => ({
-          ...prev,
-          showLogo: !showLogo
-        }));
         throw new Error('Error actualizando preferencia');
       }
-
+  
+      // Actualizar inmediatamente el estado del competidor seleccionado
+      setSelectedCompetitor(prev => ({
+        ...prev,
+        show_logo: String(showLogo).toLowerCase()
+      }));
+  
+      // Recargar todos los competidores
+      await loadCompetitors();
+  
     } catch (error) {
       console.error('Error:', error);
       setError('Error al actualizar la preferencia de visualización');
@@ -395,7 +386,7 @@ const CompetitorsProd = () => {
       setIsRescanningTech(true);
       setRescanTechError(null);
       
-      const response = await fetch(`http://localhost:8000/detect-technology/?url=${encodeURIComponent(competitor.url)}`);
+      const response = await fetch(`http://localhost:8000/api/detect-technology?url=${encodeURIComponent(competitor.url)}`);
       if (!response.ok) throw new Error('No se pudo detectar la tecnología');
       
       const techData = await response.json();
@@ -465,15 +456,21 @@ const CompetitorsProd = () => {
       {/* Lista de competidores */}
       {viewMode === 'cards' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {competitors.map((competitor) => (
-            <CompetitorCard
+          {competitors.map((competitor, index) => (
+            <motion.div
               key={competitor.id}
-              competitor={competitor}
-              handleViewClick={handleViewClick}
-              handleScanClick={handleScanClick}
-              handleDeleteClick={handleDeleteClick}
-              getTechnologyLogo={getTechnologyLogo}
-            />
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: index * 0.1 }}
+            >
+              <CompetitorCard
+                competitor={competitor}
+                handleViewClick={handleViewClick}
+                handleScanClick={handleScanClick}
+                handleDeleteClick={handleDeleteClick}
+                getTechnologyLogo={getTechnologyLogo}
+              />
+            </motion.div>
           ))}
         </div>
       ) : (

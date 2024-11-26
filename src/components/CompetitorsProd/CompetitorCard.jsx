@@ -18,23 +18,16 @@ const CompetitorCard = ({
     >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 gap-4">
         <div className="flex items-center gap-4">
-          {competitor.logo && competitor.logo !== '' && competitor.logo !== 'undefined' && competitor.showLogo ? (
+          {competitor.link_logo && competitor.link_logo !== '' && competitor.link_logo !== 'undefined' && competitor.show_logo === 'true' ? (
             <div className="relative h-12 w-24 bg-gradient-to-br from-slate-100 to-slate-50 rounded-lg overflow-hidden">
-              {/* Patrón de fondo */}
-              <div className="absolute inset-0 opacity-10" 
-                  style={{
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%239C92AC' fill-opacity='0.2' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E")`,
-                    backgroundSize: '8px 8px'
-                  }}>
-              </div>
               <img 
-                src={competitor.logo} 
+                src={competitor.link_logo} 
                 alt={competitor.name}
-                className="h-full w-full object-contain p-1 relative z-10"
+                className="h-full w-full object-contain p-1"
                 onError={(e) => {
                   e.target.onerror = null;
                   e.target.style.display = 'none';
-                  e.target.parentElement.parentElement.innerHTML = `<div class="h-12 w-32 flex items-center justify-center text-xl font-bold text-slate-700 truncate">${competitor.name}</div>`;
+                  e.target.parentElement.parentElement.innerHTML = `<div class="h-12 w-32 flex items-center justify-start text-xl font-bold text-slate-700 truncate">${competitor.name}</div>`;
                 }}
               />
             </div>
