@@ -353,41 +353,7 @@ const handleResumeHtml = async (url) => {
     }
   };
 
-  // Agregar nueva función para re-escanear logo
-const handleRescanLogo = async (competitor) => {
-  try {
-    setIsRescanningLogo(true);
-    setRescanError(null);
-    
-    const logoResponse = await fetch(`http://localhost:8000/get-logo/?url=${encodeURIComponent(competitor.url)}`);
-    if (!logoResponse.ok) throw new Error('No se pudo obtener el logo automáticamente');
-    
-    const logoData = await logoResponse.json();
-    if (logoData && logoData.logo_link) {
-      const updatedCompetitors = competitors.map(comp => {
-        if (comp.id === competitor.id) {
-          return { ...comp, logo: logoData.logo_link };
-        }
-        return comp;
-      });
-      setCompetitors(updatedCompetitors);
-      
-      setSelectedCompetitor(prev => ({
-        ...prev,
-        logo: logoData.logo_link
-      }));
-    } else {
-      throw new Error('No se encontró un logo válido');
-    }
-  } catch (error) {
-    console.error('Error:', error);
-    setRescanError(error.message);
-  } finally {
-    setIsRescanningLogo(false);
-  }
-};
-
-// Agregar nueva función para re-escanear tecnología
+  // Agregar nueva función para re-escanear tecnología
 const handleRescanTechnology = async (competitor) => {
   try {
     setIsRescanningTech(true);

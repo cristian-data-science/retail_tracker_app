@@ -11,23 +11,29 @@ const CompetitorsTable = ({
   handleDeleteClick,
   getTechnologyLogo,
 }) => {
-  // Agregar estado para almacenar el conteo de categorías
+  // Modificar el estado para incluir más detalles
   const [categoryCounts, setCategoryCounts] = useState({});
 
-  // Efecto para cargar el conteo de categorías para cada competidor
   useEffect(() => {
     const fetchCategoryCounts = async () => {
       const counts = {};
       for (const competitor of competitors) {
         try {
-          const response = await fetch(`http://localhost:8000/get-existing-categories/${competitor.name}`);
+          const response = await fetch(`http://localhost:8000/api/get-existing-categories/${encodeURIComponent(competitor.name.toLowerCase())}`);
           if (response.ok) {
             const data = await response.json();
-            counts[competitor.name] = data.total_categories || 0;
+            const parentCount = data.categories.length;
+            const childCount = data.categories.reduce((acc, category) => 
+              acc + (category.children?.length || 0), 0);
+            counts[competitor.name] = {
+              total: parentCount + childCount,
+              parent: parentCount,
+              child: childCount
+            };
           }
         } catch (error) {
           console.error('Error fetching category count:', error);
-          counts[competitor.name] = 0;
+          counts[competitor.name] = { total: 0, parent: 0, child: 0 };
         }
       }
       setCategoryCounts(counts);
@@ -129,7 +135,10 @@ const CompetitorsTable = ({
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                  {categoryCounts[competitor.name] || 0} categorías
+                  {categoryCounts[competitor.name]?.total || 0} categorías
+                </span>
+                <span className="text-xs text-slate-500 ml-2">
+                  ({categoryCounts[competitor.name]?.parent || 0} / {categoryCounts[competitor.name]?.child || 0})
                 </span>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">

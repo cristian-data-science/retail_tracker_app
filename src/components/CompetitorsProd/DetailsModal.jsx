@@ -47,21 +47,28 @@ const DetailsModal = ({
   setActiveTab,
 }) => {
   // Agregar estado para el total de categorías
-  const [categoriesCount, setCategoriesCount] = useState(0);
+  const [categoriesCount, setCategoriesCount] = useState({
+    total: 0,
+    parent: 0,
+    child: 0
+  });
 
   // Agregar useEffect para cargar las categorías
   useEffect(() => {
     const fetchCategories = async () => {
       if (selectedCompetitorDetails) {
         try {
-          const response = await fetch(`http://localhost:8000/get-existing-categories/${selectedCompetitorDetails.name}`);
+          const response = await fetch(`http://localhost:8000/api/get-existing-categories/${encodeURIComponent(selectedCompetitorDetails.name.toLowerCase())}`);
           if (response.ok) {
             const data = await response.json();
-            // Calcular el total de categorías (padres + hijos)
-            const totalCategories = data.categories.reduce((acc, category) => {
-              return acc + 1 + (category.children ? category.children.length : 0);
-            }, 0);
-            setCategoriesCount(totalCategories);
+            const parentCount = data.categories.length;
+            const childCount = data.categories.reduce((acc, category) => 
+              acc + (category.children?.length || 0), 0);
+            setCategoriesCount({
+              total: parentCount + childCount,
+              parent: parentCount,
+              child: childCount
+            });
           }
         } catch (error) {
           console.error('Error fetching categories:', error);
@@ -148,9 +155,11 @@ const DetailsModal = ({
                   <h3 className="text-lg font-semibold text-purple-900">Categorías</h3>
                 </div>
                 <p className="text-3xl font-bold text-purple-700">
-                  <CounterComponent value={categoriesCount} />
+                  <CounterComponent value={categoriesCount.total} />
                 </p>
-                <p className="text-sm text-purple-600">categorías encontradas</p>
+                <p className="text-sm text-purple-600 mt-1">
+                  {categoriesCount.parent} principales • {categoriesCount.child} subcategorías
+                </p>
               </div>
 
               <div className="bg-gradient-to-br from-amber-50 to-amber-100 p-6 rounded-xl">
