@@ -307,36 +307,36 @@ const ScanModal = ({
                         {category.children?.length || 0}
                       </span>
                     </div>
+
+                    {/* Tooltip mejorado */}
+                    {category.children && category.children.length > 0 && (
+                      <div className="absolute left-[calc(100%+16px)] top-0 hidden group-hover:block z-50 min-w-[250px]">
+                        <div className="bg-white shadow-xl rounded-lg p-4 border border-slate-200">
+                          <div className="text-sm font-medium text-slate-900 mb-3 flex items-center gap-2">
+                            <Package size={14} className="text-blue-600" />
+                            {normalizeText(category.name)}
+                          </div>
+                          <div className="grid gap-2 max-h-[200px] overflow-y-auto">
+                            {category.children.map((child, idx) => (
+                              <a
+                                key={idx}
+                                href={child.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-sm text-slate-600 hover:text-blue-600 flex items-center gap-2 transition-colors"
+                              >
+                                <div className="w-1.5 h-1.5 rounded-full bg-blue-600"></div>
+                                {normalizeText(child.name)}
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                        {/* Flecha del tooltip */}
+                        <div className="absolute left-0 top-4 -translate-x-[6px] w-3 h-3 bg-white transform rotate-45 border-l border-b border-slate-200"></div>
+                      </div>
+                    )}
                   </div>
                 </div>
-
-                {/* Tooltip mejorado */}
-                {category.children && category.children.length > 0 && (
-                  <div className="absolute left-[calc(100%+16px)] top-0 hidden group-hover:block z-50 min-w-[250px]">
-                    <div className="bg-white shadow-xl rounded-lg p-4 border border-slate-200">
-                      <div className="text-sm font-medium text-slate-900 mb-3 flex items-center gap-2">
-                        <Package size={14} className="text-blue-600" />
-                        {normalizeText(category.name)}
-                      </div>
-                      <div className="grid gap-2 max-h-[200px] overflow-y-auto">
-                        {category.children.map((child, idx) => (
-                          <a
-                            key={idx}
-                            href={child.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-sm text-slate-600 hover:text-blue-600 flex items-center gap-2 transition-colors"
-                          >
-                            <div className="w-1.5 h-1.5 rounded-full bg-blue-600"></div>
-                            {normalizeText(child.name)}
-                          </a>
-                        ))}
-                      </div>
-                    </div>
-                    {/* Flecha del tooltip */}
-                    <div className="absolute left-0 top-4 -translate-x-[6px] w-3 h-3 bg-white transform rotate-45 border-l border-b border-slate-200"></div>
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -354,8 +354,8 @@ const ScanModal = ({
         // 1. Iniciar el escaneo
         const scanResponse = await fetch(
             `http://localhost:8000/api/products/scan-links/?url=${encodeURIComponent(selectedCompetitor.url)}&competitor_name=${encodeURIComponent(selectedCompetitor.name)}`,
-            { method: 'POST' }
-        );
+            { method: 'POST'
+        });
       
         if (!scanResponse.ok) {
             throw new Error(`Error HTTP: ${scanResponse.status}`);
@@ -809,10 +809,10 @@ const TextModal = ({ extractedText, onClose }) => {
                     {localIsSegmenting ? (
                       <>
                         <Loader2 size={14} className="animate-spin" />
-                        Segmentando...
+                        <span>Segmentando...</span>
                       </>
                     ) : (
-                      'Segmentar Texto'
+                      <span>Segmentar Texto</span>
                     )}
                   </motion.button>
                 </div>
@@ -991,6 +991,230 @@ const TextModal = ({ extractedText, onClose }) => {
     </AnimatePresence>
   );
 };
+
+  // Agregar después de los estados existentes
+  const [isSegmentingAll, setIsSegmentingAll] = useState(false);
+  const [segmentAllError, setSegmentAllError] = useState(null);
+  const [scannedProducts, setScannedProducts] = useState([]);
+  const [lastProductsUpdate, setLastProductsUpdate] = useState(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [totalLinks, setTotalLinks] = useState(0);
+  const [pendingProducts, setPendingProducts] = useState({
+    count: 0,
+    lastSuccess: null,
+    lastTimestamp: null
+  });
+  const [showResumeButton, setShowResumeButton] = useState(false);
+
+  // Agregar esta función después de los estados y antes de los useEffect
+const countLinks = async () => {
+  try {
+    const response = await fetch(
+      `http://localhost:8000/api/products/count-links/${encodeURIComponent(selectedCompetitor.name)}`
+    );
+    
+    if (!response.ok) {
+      throw new Error('Error al obtener el conteo de enlaces');
+    }
+    
+    const data = await response.json();
+    return data.total_links;
+  } catch (error) {
+    console.error('Error:', error);
+    return 0;
+  }
+};
+
+  // Modificar handleSegmentAll
+const handleSegmentAll = async () => {
+  if (!selectedCompetitor?.name) return;
+  
+  // Obtener total de enlaces primero
+  const total = await countLinks();
+  setTotalLinks(total);
+  
+  if (total === 0) {
+    setSegmentAllError('No hay enlaces disponibles para procesar');
+    return;
+  }
+  
+  // Mostrar modal de confirmación
+  setShowConfirmModal(true);
+};
+
+// Modificar handleConfirmSegmentAll para aceptar un parámetro
+const handleConfirmSegmentAll = async (mode = 'full') => {
+  try {
+    console.log(`Iniciando procesamiento en modo: ${mode}`);
+    
+    let endpoint;
+    switch (mode) {
+      case 'test':
+        endpoint = `http://localhost:8000/api/products/segment-test/${encodeURIComponent(selectedCompetitor.name)}`;
+        break;
+      case 'resume':
+        endpoint = `http://localhost:8000/api/products/resume-processing/${encodeURIComponent(selectedCompetitor.name)}`;
+        break;
+      default:
+        endpoint = `http://localhost:8000/api/products/segment-all/${encodeURIComponent(selectedCompetitor.name)}`;
+    }
+    
+    setIsSegmentingAll(true);
+    setSegmentAllError(null);
+    
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Error al procesar productos');
+    }
+
+    setShowConfirmModal(false); // Solo cerrar el modal de confirmación
+    
+  } catch (error) {
+    console.error('Error detallado:', error);
+    setSegmentAllError(error.message);
+  }
+};
+
+useEffect(() => {
+  const loadExistingProducts = async () => {
+    if (selectedCompetitor?.name) {
+      try {
+        const response = await fetch(
+          `http://localhost:8000/api/products/existing-products/${encodeURIComponent(selectedCompetitor.name)}`
+        );
+        
+        if (!response.ok) {
+          console.log('No se encontraron productos');
+          setScannedProducts([]);
+          setLastProductsUpdate(null);
+          return;
+        }
+        
+        const data = await response.json();
+        if (data.products && Array.isArray(data.products)) {
+          setScannedProducts(data.products);
+          setLastProductsUpdate(data.last_update);
+          console.log('Productos cargados:', data.products);
+        }
+      } catch (error) {
+        console.error('Error al cargar productos:', error);
+        setScannedProducts([]);
+        setLastProductsUpdate(null);
+      }
+    }
+  };
+
+  if (showScanModal) {
+    loadExistingProducts();
+  }
+}, [selectedCompetitor, showScanModal]);
+
+// Agregar nuevo estado para el progreso
+const [processingProgress, setProcessingProgress] = useState({
+  is_processing: false,
+  progress_percentage: 0,
+  status_message: '',
+  total_products: 0,
+  processed_products: 0
+});
+
+// Reemplazar los dos useEffect de polling por uno solo más eficiente
+useEffect(() => {
+  let intervalId;
+  
+  const checkProcessingStatus = async () => {
+    if (selectedCompetitor?.name) {
+      try {
+        const response = await fetch(
+          `http://localhost:8000/api/products/processing-status/${encodeURIComponent(selectedCompetitor.name)}`
+        );
+        const data = await response.json();
+        setProcessingProgress(data);
+        
+        // Si no está procesando, detener el polling y actualizar isSegmentingAll
+        if (!data.is_processing) {
+          clearInterval(intervalId);
+          setIsSegmentingAll(false); // Actualizar el estado del botón
+        }
+      } catch (error) {
+        console.error('Error checking processing status:', error);
+        clearInterval(intervalId); // También detener en caso de error
+        setIsSegmentingAll(false); // También actualizar en caso de error
+      }
+    }
+  };
+
+  // Solo iniciar el polling si:
+  // 1. Hay un competidor seleccionado Y
+  // 2. Se está segmentando todo O se muestra el modal de confirmación O hay procesamiento activo
+  if (selectedCompetitor?.name && (isSegmentingAll || showConfirmModal || processingProgress?.is_processing)) {
+    checkProcessingStatus(); // Chequear inmediatamente
+    intervalId = setInterval(checkProcessingStatus, 2000);
+  }
+
+  return () => {
+    if (intervalId) clearInterval(intervalId);
+  };
+}, [
+  selectedCompetitor?.name, 
+  isSegmentingAll, 
+  showConfirmModal,
+  processingProgress?.is_processing // Agregar esta dependencia
+]); 
+
+// Modificar el useEffect para cargar productos pendientes
+useEffect(() => {
+  const loadPendingProducts = async () => {
+    if (selectedCompetitor?.name && openSections.products) {
+      try {
+        const response = await fetch(
+          `http://localhost:8000/api/products/pending-products/${encodeURIComponent(selectedCompetitor.name.toLowerCase())}`
+        );
+        
+        if (!response.ok) {
+          throw new Error(`Error HTTP: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        
+        setPendingProducts({
+          count: data.pending_count,
+          lastSuccess: null,
+          lastTimestamp: data.last_update
+        });
+        
+        // Usar el valor show_resume del backend
+        setShowResumeButton(data.show_resume);
+        
+        console.log('Show resume button:', data.show_resume); // Debug log
+        
+      } catch (error) {
+        console.error('Error loading pending products:', error);
+        setPendingProducts({
+          count: 0,
+          lastSuccess: null,
+          lastTimestamp: null
+        });
+        setShowResumeButton(false);
+      }
+    }
+  };
+
+  loadPendingProducts();
+}, [selectedCompetitor?.name, openSections.products]); // Mantener estas dependencias
+
+// Agregar nuevo useEffect para limpiar el error cuando cambia el competidor
+useEffect(() => {
+  // Limpiar el error cuando cambia el competidor
+  setSegmentAllError(null);
+}, [selectedCompetitor]);
 
   return (
     <AnimatePresence>
@@ -1434,23 +1658,221 @@ const TextModal = ({ extractedText, onClose }) => {
                       className="overflow-hidden"
                     >
                       <div className="p-4 space-y-4 bg-white">
-                        <div className="flex flex-col items-center justify-center p-8 text-center">
-                          <p className="text-slate-600">
-                            Funcionalidad en desarrollo
-                            <br />
-                            <span className="text-sm text-slate-400">
-                              Próximamente podrás ver los productos aquí
-                            </span>
-                          </p>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="text-sm font-medium text-slate-900">
+                              Procesar Productos
+                            </h4>
+                            {processingProgress ? (
+                              <div className="space-y-2">
+                                <p className="text-sm text-slate-600">
+                                  {processingProgress.is_processing 
+                                    ? `${processingProgress.status_message.replace('...', '')} ...` // Remover los puntos suspensivos originales
+                                    : scannedProducts.length > 0
+                                      ? `Última actualización: ${new Date(lastProductsUpdate).toLocaleString()}`
+                                      : 'No hay productos procesados'}
+                                </p>
+                                {processingProgress.is_processing && (
+                                  <div className="relative w-full">
+                                    <div className="w-full bg-slate-200 rounded-full h-2">
+                                      <div
+                                        className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                                        style={{ width: `${processingProgress.progress_percentage}%` }}
+                                      />
+                                    </div>
+                                    <span className="absolute right-0 -top-6 text-xs text-slate-600">
+                                      {Math.round(processingProgress.progress_percentage)}%
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <p className="text-xs text-slate-500">
+                                {scannedProducts.length > 0 
+                                  ? `Última actualización: ${new Date(lastProductsUpdate).toLocaleString()}`
+                                  : 'No hay productos procesados'}
+                              </p>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2"> {/* Añadir contenedor para botones */}
+                            {showResumeButton && pendingProducts.count > 0 && ( // Agregar botón de reanudar
+                              <button
+                                onClick={() => handleConfirmSegmentAll('resume')}
+                                className="text-sm px-3 py-1.5 rounded-lg transition-colors flex items-center gap-2 
+                                  text-amber-600 hover:text-amber-700 border border-amber-200 hover:border-amber-300"
+                              >
+                                <RefreshCcw size={14} />
+                                <span>Reanudar ({pendingProducts.count})</span>
+                              </button>
+                            )}
+                            <button
+                              onClick={handleSegmentAll}
+                              disabled={isSegmentingAll}
+                              className={`text-sm px-3 py-1.5 rounded-lg transition-colors flex items-center gap-2
+                                ${isSegmentingAll 
+                                  ? 'bg-slate-100 text-slate-400 cursor-not-allowed' 
+                                  : 'text-blue-600 hover:text-blue-700 border border-blue-200 hover:border-blue-300'}`}
+                            >
+                              {isSegmentingAll ? (
+                                <>
+                                  <Loader2 size={14} className="animate-spin" />
+                                  <span>Procesando...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <BarChart2 size={14} />
+                                  <span>Segmentar Todo</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
                         </div>
+                        
+                        {segmentAllError && (
+                          <div className="mt-2 text-xs text-red-600 bg-red-50 p-2 rounded-lg flex items-center gap-2">
+                            <AlertTriangle size={12} />
+                            <span>{segmentAllError}</span>
+                          </div>
+                        )}
+
+                        {/* Lista de productos escaneados */}
+                        {scannedProducts.length > 0 && (
+                          <div className="mt-4">
+                            <div className="bg-slate-50 rounded-lg p-4">
+                              <h5 className="text-sm font-medium text-slate-900 mb-4">
+                                Productos Procesados ({scannedProducts.length})
+                                {scannedProducts.length > 10 && (
+                                  <span className="text-xs text-slate-500 ml-2">
+                                    Mostrando los últimos 10 de {scannedProducts.length} productos
+                                  </span>
+                                )}
+                              </h5>
+                              <div className="space-y-3">
+                                {/* Modificar para mostrar solo los últimos 10 productos */}
+                                {scannedProducts.slice(-10).map((product, index) => (
+                                  <motion.div
+                                    key={index}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: index * 0.1 }}
+                                    className="bg-white p-3 rounded-lg shadow-sm border border-slate-200"
+                                  >
+                                    <div className="grid grid-cols-2 gap-4">
+                                      <div>
+                                        <h6 className="font-medium text-slate-900">{product.name}</h6>
+                                        <p className="text-sm text-slate-500">SKU: {product.sku}</p>
+                                      </div>
+                                      <div className="text-right">
+                                        <p className="font-medium text-emerald-600">
+                                          {new Intl.NumberFormat('es-CL', { 
+                                            style: 'currency', 
+                                            currency: 'CLP' 
+                                          }).format(product.price)}
+                                        </p>
+                                        <div className="flex gap-1 justify-end mt-1">
+                                          {product.colors.map((color, idx) => (
+                                            <span key={idx} className="px-2 py-0.5 text-xs bg-violet-50 text-violet-700 rounded-full">
+                                              {color}
+                                            </span>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </motion.div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
               </motion.div>
 
+              {/* Modal de Confirmación actualizado */}
+              {showConfirmModal && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[70] flex items-center justify-center"
+                  onClick={() => setShowConfirmModal(false)}
+                >
+                  <motion.div
+                    initial={{ scale: 0.95, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.95, opacity: 0 }}
+                    className="bg-white rounded-xl p-6 w-full max-w-md shadow-xl"
+                    onClick={e => e.stopPropagation()}
+                  >
+                    <div className="text-center space-y-4">
+                      <AlertTriangle className="w-12 h-12 text-yellow-500 mx-auto" />
+                      <h3 className="text-lg font-medium text-slate-900">
+                        Selecciona el modo de procesamiento
+                      </h3>
+                      <p className="text-sm text-slate-600">
+                        Total de productos disponibles: {totalLinks}
+                      </p>
+                      
+                      <div className="grid gap-3 mt-6">
+                        <button
+                          onClick={() => handleConfirmSegmentAll('test')}
+                          className="px-4 py-3 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors flex items-center justify-center gap-2"
+                        >
+                          <Package size={18} />
+                          <div className="text-left">
+                            <div className="font-medium">Modo Prueba</div>
+                            <div className="text-xs text-blue-500">Procesar solo 2 productos</div>
+                          </div>
+                        </button>
+                        
+                        <button
+                          onClick={() => handleConfirmSegmentAll('full')}
+                          className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                        >
+                          <BarChart2 size={18} />
+                          <div className="text-left">
+                            <div className="font-medium">Proceso Completo</div>
+                            <div className="text-xs text-blue-100">Procesar todos los productos</div>
+                          </div>
+                        </button>
+
+                        {/* Nuevo botón de reanudación */}
+                        {pendingProducts.pending_count > 0 && (
+                          <button
+                            onClick={() => {
+                              console.log("Reanudando con datos:", pendingProducts);
+                              handleConfirmSegmentAll('resume');
+                            }}
+                            className="px-4 py-3 bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-100 transition-colors flex items-center justify-center gap-2" // Añadido justify-center
+                          >
+                            <RefreshCcw size={18} />
+                            <div className="text-center w-full"> {/* Añadido text-center y w-full */}
+                              <div className="font-medium">Reanudar Última Ejecución</div>
+                              <div className="text-xs text-amber-600">
+                                {pendingProducts.pending_count} productos pendientes
+                                {pendingProducts.last_timestamp && 
+                                  ` • Último éxito: ${new Date(pendingProducts.last_timestamp).toLocaleString()}`}
+                              </div>
+                            </div>
+                          </button>
+                        )}
+                        
+                        <button
+                          onClick={() => setShowConfirmModal(false)}
+                          className="px-4 py-2 border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
+                        >
+                          Cancelar
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                </motion.div>
+              )}
+
               {/* Programación de Escaneo */}
-              <div className="mt-8 p-4 bg-slate-50 rounded-lg"></div>
+              <div className="mt-8 p-4 bg-slate-50 rounded-lg">
                 <h3 className="font-medium mb-4">Programación de Escaneo</h3>
                 <div className="flex gap-4">
                   <button className="flex-1 px-4 py-2 bg-[#FF6B2B] text-white rounded-lg hover:bg-[#e55b1e] transition-colors">
@@ -1467,19 +1889,21 @@ const TextModal = ({ extractedText, onClose }) => {
                 >
                   {(isRescanningTech || isRescanningLogo) ? 'Cancelar Escaneo' : 'Cerrar'}
                 </button>
-
-                {showTextModal && (
-                  <TextModal 
-                    extractedText={extractedText} 
-                    onClose={() => setShowTextModal(false)} 
-                  />
-                )}
               </div>
-            </motion.div>
+
+              {/* Modal de texto */}
+              {showTextModal && (
+                <TextModal 
+                  extractedText={extractedText} 
+                  onClose={() => setShowTextModal(false)} 
+                />
+              )}
+            </div>
           </motion.div>
-        )}
-      </AnimatePresence>
-    );
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
 };
 
 export default ScanModal;

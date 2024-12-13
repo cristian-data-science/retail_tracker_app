@@ -1,4 +1,3 @@
-
 // src/components/CompetitorsProd.jsx
 
 import React, { useState, useEffect } from 'react';
@@ -74,27 +73,14 @@ const CompetitorsProd = () => {
 
   const loadCompetitors = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/competitors/details');
-      if (!response.ok) throw new Error('Error cargando competidores');
-      
-      const data = await response.json();
-      const formattedCompetitors = data.competitors.map(comp => ({
-        id: comp.name,
-        name: comp.name,
-        url: comp.url,
-        link_logo: comp.link_logo || '', // Cambiar logo por link_logo
-        technology: comp.technology || 'Unknown',
-        technologyLogo: comp.technology_logo || '',
-        products: 0,
-        lastScraped: "Pendiente",
-        status: "active",
-        // Asegurarse de que show_logo sea string y esté en minúsculas
-        show_logo: String(comp.show_logo).toLowerCase()
-      }));
-      
-      setCompetitors(formattedCompetitors);
+        const response = await fetch('http://localhost:8000/api/competitors/details');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setCompetitors(data);
     } catch (error) {
-      console.error('Error loading competitors:', error);
+        console.error("Error loading competitors:", error);
     }
   };
 
